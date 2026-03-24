@@ -1,0 +1,418 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Food Donation System</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:url("https://images.unsplash.com/photo-1606787366850-de6330128bfc") no-repeat center/cover;
+background-attachment:fixed;
+padding:40px;
+}
+
+.container{
+background:white;
+padding:25px;
+width:420px;
+margin:auto;
+margin-top:40px;
+border-radius:10px;
+box-shadow:0 5px 20px rgba(0,0,0,0.3);
+}
+.container,h2{
+    
+    text-align: center;
+}
+input{
+width:100%;
+padding:10px;
+margin:8px 0;
+}
+
+button{
+width:100%;
+padding:10px;
+margin-top:5px;
+background:orange;
+border:none;
+color:white;
+cursor:pointer;
+}
+
+.card{
+background:#f5f5f5;
+padding:10px;
+margin:10px 0;
+border-radius:8px;
+}
+
+.red{background:red;color:white;}
+
+</style>
+</head>
+
+<body>
+
+<!-- HOME -->
+<div class="container" id="home">
+<h2 style="font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;">🍱 MEAL AGAIN</h2>
+
+<button onclick="showDonor()">Donor</button>
+<button onclick="showReceiverLogin()">Receiver</button>
+
+<div style="margin-top:20px;color:black;padding:12px;border-radius:12px;text-align:center;background:white;">
+📩 Contact:
+<a href="mailto:sainukala85@gmail.com">mealaginsupport01@gmail.com</a>
+<br>
+To register as receiver contact this mail
+</div>
+</div>
+
+
+<!-- DONOR -->
+<div class="container" id="donor" style="display:none">
+
+<h2>Donate Food</h2>
+
+<input id="food" placeholder="Food Item">
+<input id="qty" placeholder="Quantity">
+<input id="address" placeholder="Address">
+<input id="phone" placeholder="Phone">
+<input type="file" id="image">
+
+<button onclick="addDonation()">Submit Donation</button>
+<button onclick="logout()">Back</button>
+
+</div>
+
+
+<!-- RECEIVER LOGIN -->
+<div class="container" id="receiverLogin" style="display:none">
+
+<h2>Receiver Login</h2>
+
+<input id="ruser" placeholder="Username">
+<input id="rpass" type="password" placeholder="Password">
+
+<button onclick="receiverLogin()">Login</button>
+
+</div>
+
+
+<!-- RECEIVER PANEL -->
+<div class="container" id="receiver" style="display:none;width:650px">
+
+<h2>Available Donations</h2>
+
+<div id="list"></div>
+
+<button onclick="logout()">Logout</button>
+
+</div>
+
+
+<!-- ADMIN PANEL -->
+<div class="container" id="adminPanel" style="display:none">
+
+<h2>Admin Panel</h2>
+
+<input id="newUser" placeholder="Receiver Username">
+<input id="newPass" placeholder="Receiver Password">
+
+<button onclick="addReceiver()">Add Receiver</button>
+
+<h3>Receiver Accounts</h3>
+
+<div id="receiverList"></div>
+
+<button onclick="logout()">Logout</button>
+
+</div>
+
+
+<script>
+
+let donations = JSON.parse(localStorage.getItem("donations")) || [];
+
+let receivers = JSON.parse(localStorage.getItem("receivers")) || [
+{user:"chaitu",pass:"123"}
+];
+
+function saveReceivers(){
+localStorage.setItem("receivers",JSON.stringify(receivers));
+}
+
+function hideAll(){
+
+document.getElementById("home").style.display="none";
+document.getElementById("donor").style.display="none";
+document.getElementById("receiverLogin").style.display="none";
+document.getElementById("receiver").style.display="none";
+document.getElementById("adminPanel").style.display="none";
+
+}
+
+function logout(){
+hideAll();
+document.getElementById("home").style.display="block";
+}
+
+function showDonor(){
+hideAll();
+document.getElementById("donor").style.display="block";
+}
+
+function showReceiverLogin(){
+hideAll();
+document.getElementById("receiverLogin").style.display="block";
+}
+
+
+/* ADD DONATION */
+
+function addDonation(){
+
+let food=document.getElementById("food").value;
+let qty=document.getElementById("qty").value;
+let address=document.getElementById("address").value;
+let phone=document.getElementById("phone").value;
+let img=document.getElementById("image").files[0];
+
+if(!food||!qty||!address||!phone||!img){
+alert("Fill all fields");
+return;
+}
+
+let reader=new FileReader();
+
+reader.onload=function(){
+
+donations.push({
+id:Date.now(),
+food:food,
+qty:qty,
+address:address,
+phone:phone,
+image:reader.result,
+accepted:false
+});
+
+localStorage.setItem("donations",JSON.stringify(donations));
+
+alert("Donation Added");
+
+document.getElementById("food").value="";
+document.getElementById("qty").value="";
+document.getElementById("address").value="";
+document.getElementById("phone").value="";
+document.getElementById("image").value="";
+
+}
+
+reader.readAsDataURL(img);
+
+}
+
+
+
+/* LOGIN SYSTEM */
+
+function receiverLogin(){
+
+let u=document.getElementById("ruser").value;
+let p=document.getElementById("rpass").value;
+
+
+/* ADMIN LOGIN */
+
+if(u==="admin" && p==="7143"){
+
+hideAll();
+
+document.getElementById("adminPanel").style.display="block";
+
+showReceivers();
+
+return;
+
+}
+
+
+/* RECEIVER LOGIN */
+
+let ok=receivers.find(r=>r.user===u && r.pass===p);
+
+if(ok){
+
+hideAll();
+
+document.getElementById("receiver").style.display="block";
+
+showDonations();
+
+}
+else{
+alert("Wrong login");
+}
+
+}
+
+
+
+/* SHOW DONATIONS */
+
+function showDonations(){
+
+let receiverAddress="VF5V+GRC Sri Vasavi Inst of Pharmaceutical Sciences, Tadepalle, Andhra Pradesh 534102";
+
+let list=document.getElementById("list");
+
+list.innerHTML="";
+
+donations.forEach(d=>{
+
+list.innerHTML+=`
+
+<div class="card">
+
+<img src="${d.image}" width="100%">
+
+<p><b>Food:</b> ${d.food}</p>
+
+<p><b>Quantity:</b> ${d.qty}</p>
+
+<a target="_blank"
+href="https://www.google.com/maps/dir/${encodeURIComponent(receiverAddress)}/${encodeURIComponent(d.address)}">
+
+Navigate
+
+</a>
+
+${d.accepted ?
+
+`<p style="color:green">Accepted</p>
+<p>Phone: ${d.phone}</p>
+<button onclick="unaccept(${d.id})">Unaccept</button>
+<button class="red" onclick="removeDonation(${d.id})">Remove</button>`
+
+:
+
+`<button onclick="accept(${d.id})">Accept</button>`
+
+}
+
+</div>
+
+`;
+
+});
+
+}
+
+
+
+function accept(id){
+
+donations.forEach(d=>{
+if(d.id===id)d.accepted=true;
+});
+
+localStorage.setItem("donations",JSON.stringify(donations));
+
+showDonations();
+
+}
+
+function unaccept(id){
+
+donations.forEach(d=>{
+if(d.id===id)d.accepted=false;
+});
+
+localStorage.setItem("donations",JSON.stringify(donations));
+
+showDonations();
+
+}
+
+function removeDonation(id){
+
+donations=donations.filter(d=>d.id!==id);
+
+localStorage.setItem("donations",JSON.stringify(donations));
+
+showDonations();
+
+}
+
+
+
+/* ADMIN FUNCTIONS */
+
+function addReceiver(){
+
+let u=document.getElementById("newUser").value;
+
+let p=document.getElementById("newPass").value;
+
+if(!u||!p){
+alert("Enter username and password");
+return;
+}
+
+receivers.push({user:u,pass:p});
+
+saveReceivers();
+
+document.getElementById("newUser").value="";
+document.getElementById("newPass").value="";
+
+showReceivers();
+
+}
+
+
+function showReceivers(){
+
+let box=document.getElementById("receiverList");
+
+box.innerHTML="";
+
+receivers.forEach((r,i)=>{
+
+box.innerHTML+=`
+
+<div class="card">
+
+${r.user}
+
+<button class="red" onclick="removeReceiver(${i})">Remove</button>
+
+</div>
+
+`;
+
+});
+
+}
+
+
+function removeReceiver(i){
+
+receivers.splice(i,1);
+
+saveReceivers();
+
+showReceivers();
+
+}
+
+</script>
+
+</body>
+</html>
+```
