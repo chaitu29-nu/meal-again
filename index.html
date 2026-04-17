@@ -66,7 +66,7 @@ border-radius:8px;
 
 <div style="margin-top:20px;color:black;padding:12px;border-radius:12px;text-align:center;background:white;">
 📩 Contact:
-<a href="mailto:abcd123@gmail.com">mealaginsupport01@gmail.com</a>
+<a href="mailto:sainukala85@gmail.com">mealaginsupport01@gmail.com</a>
 <br>
 To register as receiver contact this mail
 </div>
@@ -99,6 +99,8 @@ To register as receiver contact this mail
 <input id="rpass" type="password" placeholder="Password">
 
 <button onclick="receiverLogin()">Login</button>
+<button onclick="logout()">Back</button>
+
 
 </div>
 
@@ -159,6 +161,8 @@ document.getElementById("adminPanel").style.display="none";
 function logout(){
 hideAll();
 document.getElementById("home").style.display="block";
+document.getElementById("ruser").value="";
+document.getElementById("rpass").value="";
 }
 
 function showDonor(){
